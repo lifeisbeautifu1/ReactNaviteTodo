@@ -1,7 +1,13 @@
 import { useState } from 'react';
-import { Text, View, FlatList } from 'react-native';
+import {
+  View,
+  FlatList,
+  Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 
-import { Header } from './components';
+import { Header, TodoItem, TodoForm } from './components';
 
 const App = () => {
   const [todos, setTodos] = useState([
@@ -23,19 +29,40 @@ const App = () => {
     },
   ]);
 
+  const deleteTodo = (id) => {
+    setTodos((prevState) => prevState.filter((item) => item.id !== id));
+  };
+
+  const addTodo = (text) => {
+    if (text.length > 3) {
+      setTodos((prevState) => [{ text, id: Math.random() }, ...prevState]);
+    } else {
+      Alert.alert('OPPS!', 'Todos must be at least 3 characters long.', [
+        {
+          text: 'Okay',
+        },
+      ]);
+    }
+  };
+
   return (
-    <View className="flex bg-gray-100  w-full h-full">
-      <Header />
-      <View className="p-10">
-        <View className="mt-5">
-          <FlatList
-            renderItem={({ item }) => <Text>{item.text}</Text>}
-            keyExtractor={(item) => item.id}
-            data={todos}
-          />
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View className="flex flex-1 bg-gray-100  w-full h-full">
+        <Header />
+        <View className="p-10 flex-1">
+          <TodoForm addTodo={addTodo} />
+          <View className="mt-5 flex flex-1 flex-col gap-4">
+            <FlatList
+              renderItem={({ item }) => (
+                <TodoItem deleteTodo={deleteTodo} item={item} />
+              )}
+              keyExtractor={(item) => item.id}
+              data={todos}
+            />
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
